@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sogari.cc/gasto/schemas/receipt-v1.json",
+  "title": "Gastô NFC-e receipt export",
+  "description": "The JSON format written by Gastô when exporting an imported NFC-e receipt.",
+  "type": "object",
+  "properties": {
+    "accessKey": {
+      "type": "string",
+      "description": "The access key identifying the receipt in the tax authority."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "The receipt portal URL requested by the importer."
+    },
+    "receipt": {
+      "$ref": "#/$defs/Receipt",
+      "description": "The receipt data parsed from the portal response."
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The issuance instant in the issuer's time zone, when the issuance details can be resolved."
+    },
+    "municipalityCode": {
+      "type": "integer",
+      "description": "The seven-digit IBGE code of the issuer's municipality, when the issuance details can be resolved."
+    },
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "The public JSON Schema URL for this receipt export.",
+      "const": "https://sogari.cc/gasto/schemas/receipt-v1.json"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "accessKey",
+    "url",
+    "receipt",
+    "$schema"
+  ],
+  "dependentRequired": {
+    "municipalityCode": [
+      "issuedAt"
+    ]
+  },
+  "$defs": {
+    "Receipt": {
+      "type": "object",
+      "properties": {
+        "merchant": {
+          "$ref": "#/$defs/ReceiptMerchant",
+          "description": "The issuing merchant's details, if present."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReceiptItem"
+          },
+          "description": "The purchased items in receipt order.",
+          "minItems": 1
+        },
+        "totals": {
+          "$ref": "#/$defs/ReceiptTotals",
+          "description": "The totals reported by the receipt, if it has a totals section."
+        },
+        "payments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReceiptPayment"
+          },
+          "description": "The payment entries in receipt order. Empty when no entries could be read."
+        },
+        "metadata": {
+          "$ref": "#/$defs/ReceiptMetadata",
+          "description": "The receipt's issuance and authorization details, if present."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "payments"
+      ]
+    },
+    "ReceiptMerchant": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The merchant's legal name as shown on the receipt."
+        },
+        "cnpj": {
+          "type": "string",
+          "description": "The merchant's Brazilian business tax identifier as shown on the receipt."
+        },
+        "address": {
+          "type": "string",
+          "description": "The merchant's physical address shown on the receipt, if present."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReceiptItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The zero-based position of the item row on the source document."
+        },
+        "name": {
+          "type": "string",
+          "description": "The product description shown on the receipt."
+        },
+        "code": {
+          "type": "string",
+          "description": "The product code shown on the receipt, if present."
+        },
+        "quantity": {
+          "type": "string",
+          "description": "The quantity as text, preserving the receipt's decimal formatting."
+        },
+        "unit": {
+          "type": "string",
+          "description": "The unit of measure of the product, if present."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The price per unit in BRL, which may include fractions of a cent."
+        },
+        "lineTotal": {
+          "type": "number",
+          "description": "The total amount for this line in BRL as reported on the receipt."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "lineTotal"
+      ]
+    },
+    "ReceiptTotals": {
+      "type": "object",
+      "properties": {
+        "itemCount": {
+          "type": "integer",
+          "description": "The reported number of line items."
+        },
+        "grossTotal": {
+          "type": "number",
+          "description": "The gross amount reported before any applied discounts."
+        },
+        "totalDiscounts": {
+          "type": "number",
+          "description": "The total discounts applied to the receipt."
+        },
+        "totalDue": {
+          "type": "number",
+          "description": "The final amount reported as payable on the receipt."
+        },
+        "totalTaxes": {
+          "type": "number",
+          "description": "The total incident taxes reported on the receipt."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReceiptPayment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The zero-based position of the payment row on the source document."
+        },
+        "method": {
+          "type": "string",
+          "description": "The payment method label as shown on the receipt."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount reported as paid with this payment method, in BRL."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "method"
+      ]
+    },
+    "ReceiptMetadata": {
+      "type": "object",
+      "properties": {
+        "issuingType": {
+          "$ref": "#/$defs/ReceiptMetadata.IssuingType",
+          "description": "The issuance mode, if recognized."
+        },
+        "number": {
+          "type": "string",
+          "description": "The fiscal document number as reported by the portal."
+        },
+        "series": {
+          "type": "string",
+          "description": "The fiscal document series as reported by the portal."
+        },
+        "issuingDateTime": {
+          "type": "string",
+          "description": "The issuance date and time as text in `dd/MM/yyyy HH:mm:ss` format."
+        },
+        "authorizationProtocol": {
+          "type": "string",
+          "description": "The authorization protocol number assigned by the tax authority."
+        },
+        "authorizationDateTime": {
+          "type": "string",
+          "description": "The authorization date and time as text in `dd/MM/yyyy HH:mm:ss` format."
+        },
+        "environment": {
+          "$ref": "#/$defs/ReceiptMetadata.Environment",
+          "description": "The tax authority environment, if recognized."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReceiptMetadata.IssuingType": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "contingency"
+      ]
+    },
+    "ReceiptMetadata.Environment": {
+      "type": "string",
+      "enum": [
+        "production",
+        "staging"
+      ]
+    }
+  }
+}
