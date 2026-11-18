@@ -33,11 +33,13 @@ O histórico de notas fica em memória enquanto o aplicativo está em execução
 
 ## Importação e exportação de arquivos JSON
 
-Ao selecionar **Importar JSON**, o Gastô lê no dispositivo os dados da nota e os metadados de importação salvos no arquivo. Essa opção não consulta o portal fiscal nem solicita a localização do dispositivo.
+Ao selecionar **Importar JSON**, você pode escolher um ou mais arquivos. O Gastô lê no dispositivo os dados das notas e os metadados de importação salvos nesses arquivos. Essa opção não consulta o portal fiscal nem solicita a localização do dispositivo.
 
 O arquivo exportado preserva os parâmetros do link de consulta, que podem incluir CPF ou outro identificador do destinatário. Quem receber o arquivo poderá usar o link para consultar a nota. Quando disponíveis, o código IBGE do município do emitente e a data e hora de emissão também são incluídos no arquivo.
 
-Se você exportar uma nota, poderá guardar o arquivo localmente ou escolher o seu iCloud Drive para manter uma cópia privada. Caso escolha outro destino ou compartilhe o arquivo, a cópia estará sujeita às regras do serviço ou do destinatário escolhido. Você pode apagar os arquivos exportados via sistema de arquivos ou pelo serviço em que os salvou.
+Você pode exportar uma nota individualmente ou usar **Exportar seleção** no histórico para gerar um arquivo JSON separado para cada nota selecionada.
+
+Ao exportar, poderá guardar os arquivos localmente ou escolher o seu iCloud Drive para manter cópias privadas. Caso escolha outro destino ou compartilhe os arquivos, as cópias estarão sujeitas às regras do serviço ou do destinatário escolhido. Você pode apagar os arquivos exportados via sistema de arquivos ou pelo serviço em que os salvou.
 
 ## Seus direitos e como entrar em contato
 
@@ -53,18 +55,23 @@ Para documentar o atendimento de pedidos formais, poderemos manter um registro s
 
 A opção **Estatísticas de uso** vem desativada. Você pode ativá-la ou desativá-la em **Ajustes → Privacidade** a qualquer momento. Ao desativá-la, o Gastô descarta os resumos que ainda estão em memória e interrompe as medições.
 
-Quando a opção está ativada, o Gastô calcula a contagem de amostras, a soma, o mínimo e o máximo de cada métrica abaixo. A média é calculada a partir da soma e da contagem.
+Quando a opção está ativada, o Gastô calcula a contagem de amostras, a soma, o mínimo e o máximo de cada métrica abaixo. Também conta quantas amostras caem em cada uma de 16 faixas predefinidas. A média é calculada a partir da soma e da contagem.
 
 - Duração das requisições ao portal fiscal, incluindo as que falham.
 - Duração da análise do HTML recebido do portal.
-- Duração do processamento das buscas no histórico quando o resultado ainda não está em cache, agrupada por faixa de quantidade de notas e sem contar a espera enquanto você digita.
+- Duração do processamento das buscas no histórico de notas.
+- Duração do processamento das buscas no catálogo de produtos.
 - Tamanho em bytes do HTML recebido nas importações concluídas pelo portal.
+
+As três métricas de importação pelo portal são agrupadas pela UF do emitente, extraída da chave de acesso da nota no dispositivo. Esses grupos permitem acompanhar o desempenho das importações e sua distribuição por UF.
+
+As duas métricas de busca são registradas somente quando o resultado ainda não está em cache, sem contar a espera enquanto você digita, e são agrupadas por faixa de quantidade de notas no histórico ou de produtos no catálogo.
 
 Os resumos ficam em memória. Quando o aplicativo passa para segundo plano, o Gastô tenta enviar os resumos, a versão do aplicativo e a versão do iOS por HTTPS a um serviço hospedado na Cloudflare. O Workers Analytics Engine registra o horário de recebimento e armazena os resumos por três meses. O desenvolvedor usa esses dados para acompanhar o desempenho do Gastô.
 
 Enquanto **Estatísticas de uso** estiver ativada, a opção **Relatórios enviados** em Ajustes permite consultar a data, a hora e o JSON de cada envio bem-sucedido da sessão atual. Essa lista fica apenas em memória e é descartada quando o aplicativo é encerrado.
 
-O Gastô não inclui no envio links, chaves de acesso, termos de busca, conteúdo das notas, localização ou identificadores da conta ou do dispositivo. A Cloudflare recebe o endereço IP da conexão. O serviço usa esse endereço para limitar o volume de requisições e não o grava no conjunto de dados de estatísticas.
+O Gastô não inclui no envio links, chaves de acesso, termos de busca, itens ou valores das notas, localização do dispositivo ou identificadores da conta ou do dispositivo. A Cloudflare recebe o endereço IP da conexão. O serviço usa esse endereço para limitar o volume de requisições e não o grava no conjunto de dados de estatísticas.
 
 ## Funcionalidades futuras e opcionais
 
